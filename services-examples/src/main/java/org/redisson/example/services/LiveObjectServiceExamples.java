@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 Nikita Koksharov
+ * Copyright (c) 2016-2019 Nikita Koksharov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.redisson.example.services;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -31,7 +32,7 @@ import org.redisson.liveobject.resolver.UUIDGenerator;
 public class LiveObjectServiceExamples {
 
     @REntity
-    public static class Product {
+    public static class Product implements Serializable {
 
         @RId
         private Long id;
@@ -83,7 +84,7 @@ public class LiveObjectServiceExamples {
     }
 
     @REntity
-    public static class OrderDetail {
+    public static class OrderDetail implements Serializable {
 
         @RId(generator = LongGenerator.class)
         private Long id;
@@ -151,7 +152,7 @@ public class LiveObjectServiceExamples {
 
     @REntity
 
-    public static class Customer {
+    public static class Customer implements Serializable {
 
         @RId(generator = UUIDGenerator.class)
         private String id;
@@ -210,7 +211,7 @@ public class LiveObjectServiceExamples {
     }
     
     @REntity
-    public static class Order {
+    public static class Order implements Serializable {
 
         @RId(generator = LongGenerator.class)
         private Long id;

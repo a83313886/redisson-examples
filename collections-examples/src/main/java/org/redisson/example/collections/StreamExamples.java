@@ -15,47 +15,39 @@
  */
 package org.redisson.example.collections;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Map;
 
 import org.redisson.Redisson;
-import org.redisson.api.RQueue;
+import org.redisson.api.PendingResult;
+import org.redisson.api.RStream;
 import org.redisson.api.RedissonClient;
+import org.redisson.api.StreamMessageId;
 
-public class QueueExamples {
+public class StreamExamples {
 
     public static void main(String[] args) {
         // connects to 127.0.0.1:6379 by default
         RedissonClient redisson = Redisson.create();
+        
+        RStream<String, String> stream = redisson.getStream("test");
+        stream.createGroup("testGroup");
+        
+        StreamMessageId id1 = stream.add("1", "1");
+        StreamMessageId id2 = stream.add("2", "2");
+        
+        // contains 2 elements
+        Map<StreamMessageId, Map<String, String>> map1 = stream.readGroup("testGroup", "consumer1");
 
-        RQueue<String> queue = redisson.getQueue("myQueue");
-        queue.add("1");
-        queue.add("2");
-        queue.add("3");
-        queue.add("4");
+        // ack messages
+        stream.ack("testGroup", id1, id2);
         
-        queue.contains("1");
-        queue.peek();
-        queue.poll();
-        queue.element();
+        StreamMessageId id3 = stream.add("3", "3");
+        StreamMessageId id4 = stream.add("4", "4");
         
-        for (String string : queue) {
-            // iteration through bulk loaded values
-        }
-        
-        boolean removedValue = queue.remove("1");
-        queue.removeAll(Arrays.asList("1", "2", "3"));
-        queue.containsAll(Arrays.asList("4", "1", "0"));
-        
-        List<String> secondList = new ArrayList<>();
-        secondList.add("4");
-        secondList.add("5");
-        queue.addAll(secondList);
+        // contains next 2 elements
+        Map<StreamMessageId, Map<String, String>> map2 = stream.readGroup("testGroup", "consumer2");
 
-        RQueue<String> secondQueue = redisson.getQueue("mySecondQueue");
-        
-        queue.pollLastAndOfferFirstTo(secondQueue.getName());
+        PendingResult pi = stream.listPending("testGroup");
         
         redisson.shutdown();
     }

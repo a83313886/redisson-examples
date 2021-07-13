@@ -15,31 +15,25 @@
  */
 package org.redisson.example.objects;
 
+import java.io.IOException;
+
 import org.redisson.Redisson;
-import org.redisson.api.RBloomFilter;
+import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
+import org.redisson.config.Config;
 
-public class BloomFilterExamples {
+public class SSLExamples {
 
-    public static void main(String[] args) {
-        // connects to 127.0.0.1:6379 by default
-        RedissonClient redisson = Redisson.create();
+    public static void main(String[] args) throws IOException {
+        Config config = new Config();
 
-        RBloomFilter<String> bloomFilter = redisson.getBloomFilter("bloomFilter");
-        bloomFilter.tryInit(100_000_000, 0.03);
-        
-        bloomFilter.add("a");
-        bloomFilter.add("b");
-        bloomFilter.add("c");
-        bloomFilter.add("d");
-        
-        bloomFilter.getExpectedInsertions();
-        bloomFilter.getFalseProbability();
-        bloomFilter.getHashIterations();
-        
-        bloomFilter.contains("a");
-        
-        bloomFilter.count();
+        // rediss - defines to use SSL for Redis connection
+        config.useSingleServer().setAddress("rediss://127.0.0.1:6379");
+        RedissonClient redisson = Redisson.create(config);
+
+        RMap<String, String> map = redisson.getMap("test");
+        map.put("mykey", "myvalue");
+        String value =  map.get("mykey");
         
         redisson.shutdown();
     }

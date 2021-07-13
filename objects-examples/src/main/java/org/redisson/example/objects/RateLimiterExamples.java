@@ -13,41 +13,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.redisson.example.locks;
+package org.redisson.example.objects;
 
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CountDownLatch;
 
 import org.redisson.Redisson;
-import org.redisson.api.RPermitExpirableSemaphore;
+import org.redisson.api.RRateLimiter;
+import org.redisson.api.RateIntervalUnit;
+import org.redisson.api.RateType;
 import org.redisson.api.RedissonClient;
 
-public class PermitExpirableSemaphoreExamples {
+public class RateLimiterExamples {
 
     public static void main(String[] args) throws InterruptedException {
         // connects to 127.0.0.1:6379 by default
         RedissonClient redisson = Redisson.create();
 
-        RPermitExpirableSemaphore s = redisson.getPermitExpirableSemaphore("test");
-        s.trySetPermits(1);
-        String permitId = s.tryAcquire(100, 2, TimeUnit.SECONDS);
+        RRateLimiter limiter = redisson.getRateLimiter("myLimiter");
+        // one permit per 2 seconds
+        limiter.trySetRate(RateType.OVERALL, 1, 2, RateIntervalUnit.SECONDS);
+        
+        CountDownLatch latch = new CountDownLatch(2);
+        limiter.acquire(1);
+        latch.countDown();
 
-        Thread t = new Thread() {
-            public void run() {
-                RPermitExpirableSemaphore s = redisson.getPermitExpirableSemaphore("test");
-                try {
-                    String permitId = s.acquire();
-                    s.release(permitId);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            };
-        };
-
+        Thread t = new Thread(() -> {
+            limiter.acquire(1);
+            
+            latch.countDown();
+        });
         t.start();
         t.join();
         
-        s.tryRelease(permitId);
+        latch.await();
         
+        redisson.shutdown();
     }
     
 }

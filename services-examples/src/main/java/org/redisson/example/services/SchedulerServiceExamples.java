@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 Nikita Koksharov
+ * Copyright (c) 2016-2019 Nikita Koksharov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.redisson.example.services;
 
+import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.concurrent.Callable;
@@ -32,7 +33,7 @@ import org.redisson.config.RedissonNodeConfig;
 
 public class SchedulerServiceExamples {
 
-    public static class RunnableTask implements Runnable {
+    public static class RunnableTask implements Runnable, Serializable {
 
         @RInject
         RedissonClient redisson;
@@ -45,7 +46,7 @@ public class SchedulerServiceExamples {
         
     }
     
-    public static class CallableTask implements Callable<String> {
+    public static class CallableTask implements Callable<String>, Serializable {
 
         @RInject
         RedissonClient redisson;
